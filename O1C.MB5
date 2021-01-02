@@ -1,0 +1,175 @@
+1 'Programme Description
+2 'Operation of the Piston Assembler Robot:
+3 'Conveyor feeds the casing.
+4 'Sort between RED or BLACK casings.
+5 'Assemble RED with pistonand spring
+6 'Bring finished part to exit shoot.
+7 'Position Description:
+8 'pSafe - Robot resting position. (278.39,103.05,474.29,-168.19,0,179.22,R,A,N)
+9 'pColourTest - Colour testing Location (0.5 mm from part). (329.09,173.09,254.24,-32.72,0,179.22,R,A,N)
+10 'pConveyor - Pick up Location at Robot end of Conveyor.(327.52,228.15,256.85,94.29,0,179.22,R,A,N)
+11 'pShoot - Assembled Part Exit.(178.21,230.24,252.15,94.46,16.1,-179.54,R,A,N)
+12 'pAssemblyRack - Part Assembly Location. (-97.82,-393.8,346.85,94.15,1.75,-179.14,R,A,N)
+13 'pPiston - Piston Stock Reference Location.(-164.14,-220.13,309.99,142.06,2.04,-177.96,R,A,N)
+14 'pSpring - Spring Stock Reference Location. (-133.83,-220.65,314.87,142.06,2.04,-177.96,R,A,N)
+15 'pPartAssembly - Piston and Spring Assembly Location. (-128.77,-364.39,351.46,142.06,2.04,-177.96,R,A,N)
+16 'pCasingTest - Casing Position Test Location. (-68.43,-381.52,356.69,0.04,-0.03,-179.84,R,A,N)
+17 'Variables Declaration:
+18 'Counters:
+19 Def Inte G
+20 G% = 0
+21 Def Inte B
+22 B% = 0
+23 def POS pTested
+24 'Inputs:
+25 Def Io ConveyorStart = Bit,12
+26 Def Io PartQue = Bit,11
+27 Def Io ConveyorRobot = Bit,10
+28 Def Io RED = Bit,900
+29 DEF IO EdgeDetect = Bit,8
+30 'Outputs:
+31 Def Io ConveyorFwd = Bit,9
+32 Def Io QueGate = Bit,8
+33 'Main Loop
+34 *Start
+35 Mov pSafe
+36 HOpen 1
+37 'Conveyor Operations
+38 'Conveyor forward with Gate closed
+39 ConveyorFwd = 1
+40 QueGate = 1
+41 'If part at the gate then let through one part
+42 If PartQue = 1 Then
+43  QueGate = 0
+44  Dly 1
+45  QueGate = 1
+46  Dly 5
+47 EndIf
+48 'If part at the robot end of the conveyor then stop the conveyor
+49 If ConveyorRobot = 0 Then
+50 	ConveyorFwd = 0
+51 	Mov pColourTest, -100 'Move the Robot arm into Colour Test position
+52 	Mvs pColourTest
+53 	Dly 0.3
+54 	'Read Colour THEN Reject or Bring to Assembly
+55 	If RED = 1 Then
+56 		Mov pConveyor, -50
+57 		Mvs pConveyor
+58 		Dly 0.1
+59 		HClose 1
+60 		Dly 0.5
+61 		Mvs pConveyor, -100
+62 		Mov pAssemblyRack, -100
+63 		Mvs pAssemblyRack
+64 		Dly 0.1
+65 		HOpen 1
+66 		Dly 0.5
+67 		Mvs pAssemblyRack, -100
+68 		If G% = 0 Then
+69 			Mov pPiston, -100 'Pick Piston
+70 			Mvs pPiston
+71 			Dly 0.1
+72 			HClose 1
+73 			Dly 0.5
+74 			Mvs pPiston, -100
+75 		EndIf
+76 		If G% = 1 Then
+77 			Mvs pPiston + (+0.00,-25.00,+100.00,+0.00,+0.00,+0.00)
+78 			Dly 0.2
+79 			Mvs pPiston + (+0.00,-25.00,+0.00,+0.00,+0.00,+0.00)
+80 			Dly 0.1
+81 			HClose 1
+82 			Dly 0.5
+83 			Mvs pPiston + (+0.00,-25.00,+100.00,+0.00,+0.00,+0.00)
+84 		EndIf
+85 		If G% = 2 Then
+86 			Mvs pPiston + (+0.00,-50.00,+100.00,+0.00,+0.00,+0.00)
+87 			Dly 0.2
+88 			Mvs pPiston + (+0.00,-50.00,+0.00,+0.00,+0.00,+0.00)
+89 			Dly 0.1
+90 			HClose 1
+91 			Dly 0.5
+92 			Mvs pPiston + (+0.00,-50.00,+100.00,+0.00,+0.00,+0.00)
+93 		EndIf
+94 		If G% = 3 Then
+95 			Mvs pPiston + (+0.00,-75.00,+100.00,+0.00,+0.00,+0.00)
+96 			Mvs pPiston + (+0.00,-75.00,+0.00,+0.00,+0.00,+0.00)
+97 			Dly 0.1
+98 			HClose 1
+99 			Dly 0.5
+100 			Mvs pPiston + (+0.00,-75.00,+100.00,+0.00,+0.00,+0.00)
+101 		EndIf
+102 		Mov pPartAssembly, -100'Place Piston
+103 		Mvs pPartAssembly
+104 		Dly 0.1
+105 		HOpen 1
+106 		Dly 0.5
+107 		Mvs pPartAssembly, -100
+108 		If G% = 0 Then
+109 			Mov pSpring, -100 'Pick Spring
+110 			Mvs pSpring
+111 			Dly 0.1
+112 			HClose 1
+113 			Dly 0.5
+114 			Mvs pSpring, -100
+115 		EndIf
+116 		If G% = 1 Then
+117 			Mvs pSpring + (+0.00,-25.00,+100.00,+0.00,+0.00,+0.00)
+118 			Mvs pSpring + (+0.00,-25.00,+0.00,+0.00,+0.00,+0.00)
+119 			Dly 0.1
+120 			HClose 1
+121 			Dly 0.5
+122 			Mvs pSpring + (+0.00,-25.00,+100.00,+0.00,+0.00,+0.00)
+123 		EndIf
+124 		If G% = 2 Then
+125 			Mvs pSpring + (+0.00,-50.00,+100.00,+0.00,+0.00,+0.00)
+126 			Mvs pSpring + (+0.00,-50.00,+0.00,+0.00,+0.00,+0.00)
+127 			Dly 0.1
+128 			HClose 1
+129 			Dly 0.5
+130 			Mvs pSpring + (+0.00,-50.00,+100.00,+0.00,+0.00,+0.00)
+131 		EndIf
+132 		If G% = 3 Then
+133 			Mvs pSpring + (+0.00,-75.00,+100.00,+0.00,+0.00,+0.00)
+134 			Mvs pSpring + (+0.00,-75.00,+0.00,+0.00,+0.00,+0.00)
+135 			Dly 0.1
+136 			HClose 1
+137 			Dly 0.5
+138 			Mvs pSpring + (+0.00,-75.00,+100.00,+0.00,+0.00,+0.00)
+139 			EndIf
+140 		Mov pPartAssembly, -100'Place Spring
+141 		Mvs pPartAssembly
+142 		Dly 0.1
+143 		HOpen 1
+144 		Dly 0.5
+145 		Mvs pPartAssembly, -100
+146 		Mov pAssemblyRack, -100
+147 		Mvs pAssemblyRack
+148 		Dly 0.1
+149 		HClose 1
+150 		Dly 0.5
+151 		Mvs pAssemblyRack, -100
+152 		Mov pShoot, -100
+153 		Mvs pShoot
+154 		Dly 0.1
+155 		HOpen 1
+156 		Dly 0.5
+157 		Mvs pShoot, -100
+158 		G% = G% + 1
+159  Else
+160 	Mov pConveyor, -100
+161 	Mvs pConveyor, 2.5
+162 	Dly 0.1
+163 	HClose 1
+164 	Dly 0.5
+165 	Mvs pConveyor, -100
+166 	Mov pShoot, -100
+167 	Mvs pShoot
+168 	Dly 0.1
+169 	HOpen 1
+170 	Dly 0.5
+171 	B% = B% + 1
+172 EndIf
+173 EndIf
+174 GoTo *Start
+175 
